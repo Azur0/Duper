@@ -1,7 +1,66 @@
 #!/bin/bash
+# 2082809 Jeroen Jetrax t6 van Beuningen
+# 2139192 Burak (krakatoa) Imre
+# Duper
+start_time=$(date)
+amount_deleted=0
+del_dup=false
+exclude=false
+#exclude_dir=()
+#exclude_file=()
 
-while getopts ":rxl" VALUE "$@"; do
-	if [ $VALUE = "x" ] ; then
-		
+while getopts ":rxXl" VALUE "$@"; do
+	# om gevonden duplicaten direct te laten verwijderen;
+	if [ $VALUE = "r" ] ; then
+		echo 'duplicates will be deleted'
+		del_dup=true
+	fi
+	# <naam> om een file op te geven die buiten beschouwing gelaten moet worden bij het zoeken naar duplicaten. 
+	# (mag meerdere keren worden gebruikt, elke uit te sluiten file moet met een aparte -x genoemd worden; geen wildcards gebruiken zoals *);
+	if [ $VALUE = "x" ] ; then	
+		exclude=true
+
+		echo "$OPTARG"
+		exit 1
+	fi
+	#Voeg een optie -X <filename> toe (hoofdletter X), met als argument een configuratie file waarin alle te excluden files en/of directories staan opgesomd, één per regel. 
+	#Dat is dus een alternatief voor het meerdere malen gebruiken van de -x optie (kleine x).
+	if [ $VALUE = "X" ] ; then	
+		#extra
+		exit 1
+	fi
+	# optie -l <landcode> om een landcode in 2 letters mee te geven, waarmee de taal van de meldingen kan worden ingesteld. 
+	# Om dat te bouwen kun je voor alle meldingen shell variabelen definiëren, die je voor elke taal in een bestand zet. 
+	# Dan kun je het juiste taalbestand laden met behulp van het source-mechanisme.
+	if [ $VALUE = "l" ] ; then
+		echo 't'
+	fi
+	#er zijn opties meegegeven die je niet geïmplementeerd hebt, druk dan een usage string af;
+	if [ $VALUE = "?" ] ; then
+		echo "Unknown flag -$OPTARG detected."
+        echo "Usage: $0 [-r] [-x filename] [-l landcode] [directory]"
+        exit 1
 	fi
 done
+
+#echo $exclude_file
+
+#de start-directory bestaat niet, is geen directory, of mag niet gelezen worden.
+shift $(($OPTIND - 1))
+if [ ! -d "$1" ] ; then
+	echo "directory does not exsist"
+elif [ ! -r "$1" ] ; then
+		echo "directory is not readable"
+fi
+
+#Alleen bestanden in opgegeven start-directory (inclusief onderliggende directories) worden bekeken
+#while asdhfadsf; do
+
+	#ffind . -name $FILE
+#done
+
+#Het script maakt een directory ~/var en voegt regels aan een log file toe 
+#(duper.log) waarin diverse zaken omtrent het proces worden opgeslagen, zoals bijvoorbeeld: start-tijd eind-tijd aantal gevonden en verwijderde duplicaten
+printf "start time:\t$start_time \nend time:\t$(date) \namount deleted:\t$amount_deleted \n\n" >> ./var/log.txt
+
+exit $?
