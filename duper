@@ -1,1 +1,7 @@
 #!/bin/bash
+
+while getopts ":rxl" VALUE "$@"; do
+	if [ $VALUE = "x" ] ; then
+		
+	fi
+done
