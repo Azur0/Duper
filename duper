@@ -63,9 +63,9 @@ if [ -d "$1" ] ; then
 	while read fileName ; do
 		find $1 -type f | grep "$fileName"
 elif [ ! -d "$1" ] ; then
-	echo "directory 'val' does not exsist"
+	echo "$LANG_DirDNE"
 elif [ ! -r "$1" ] ; then
-		echo "directory is not readable"
+		echo "$LANG_DirINR"
 fi
 
 #Het script maakt een directory ~/var en voegt regels aan een log file toe 
