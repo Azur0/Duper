@@ -9,7 +9,7 @@ exclude=false
 #exclude_dir=()
 #exclude_file=()
 
-while getopts ":rxXl" VALUE "$@"; do
+while getopts ":rxXl:" VALUE "$@"; do
 	# om gevonden duplicaten direct te laten verwijderen;
 	if [ $VALUE = "r" ] ; then
 		echo 'duplicates will be deleted'
@@ -33,7 +33,15 @@ while getopts ":rxXl" VALUE "$@"; do
 	# Om dat te bouwen kun je voor alle meldingen shell variabelen definiëren, die je voor elke taal in een bestand zet. 
 	# Dan kun je het juiste taalbestand laden met behulp van het source-mechanisme.
 	if [ $VALUE = "l" ] ; then
-		echo 't'
+		echo "language: $OPTARG"
+		
+		if [ ! -d "./lang" ] ; then
+			echo "directory 'lang' does not exsist!"
+		elif [ ! -f "./lang/$OPTARG.sh" ] ; then
+			echo "Language '$OPTARG' file not found!"
+		else 
+			source "./lang/$OPTARG.sh"
+		fi
 	fi
 	#er zijn opties meegegeven die je niet geïmplementeerd hebt, druk dan een usage string af;
 	if [ $VALUE = "?" ] ; then
@@ -48,7 +56,7 @@ done
 #de start-directory bestaat niet, is geen directory, of mag niet gelezen worden.
 shift $(($OPTIND - 1))
 if [ ! -d "$1" ] ; then
-	echo "directory does not exsist"
+	echo "directory 'val' does not exsist"
 elif [ ! -r "$1" ] ; then
 		echo "directory is not readable"
 fi
