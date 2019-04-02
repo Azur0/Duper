@@ -47,17 +47,18 @@ done
 
 #de start-directory bestaat niet, is geen directory, of mag niet gelezen worden.
 shift $(($OPTIND - 1))
-if [ ! -d "$1" ] ; then
+
+if [ -d "$1" ] ; then
+	#Alleen bestanden in opgegeven start-directory (inclusief onderliggende directories) worden bekeken
+	find $1 -type f | sed 's_.*/__' | sort | uniq -d |
+	while read fileName ; do
+		find $1 -type f | grep "$fileName"
+	done
+elif [ ! -d "$1" ] ; then
 	echo "directory does not exsist"
 elif [ ! -r "$1" ] ; then
 		echo "directory is not readable"
 fi
-
-#Alleen bestanden in opgegeven start-directory (inclusief onderliggende directories) worden bekeken
-#while asdhfadsf; do
-
-	#ffind . -name $FILE
-#done
 
 #Het script maakt een directory ~/var en voegt regels aan een log file toe 
 #(duper.log) waarin diverse zaken omtrent het proces worden opgeslagen, zoals bijvoorbeeld: start-tijd eind-tijd aantal gevonden en verwijderde duplicaten
