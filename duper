@@ -2,6 +2,7 @@
 # 2082809 Jeroen Jetrax t6 van Beuningen
 # 2139192 Burak (krakatoa) Imre
 # Duper
+#=======================================
 start_time=$(date)
 amount_deleted=0
 del_dup=false
@@ -84,9 +85,9 @@ if [ -d "$1" ] ; then
 	# done
 
 elif [ ! -d "$1" ] ; then
-	echo "$LANG_DirDNE"
+	echo "${LANG_DirDNE:-directory 'val' does not exsist}"
 elif [ ! -r "$1" ] ; then
-		echo "$LANG_DirINR"
+	echo "${LANG_DirINR:-directory is not readable}"
 fi
 
 #Het script maakt een directory ~/var en voegt regels aan een log file toe 
