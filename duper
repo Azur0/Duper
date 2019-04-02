@@ -55,13 +55,34 @@ done
 
 #de start-directory bestaat niet, is geen directory, of mag niet gelezen worden.
 shift $(($OPTIND - 1))
-	done
 
 if [ -d "$1" ] ; then
 	find $1 -type f | sed 's_.*/__' | sort | uniq -d |
 	#Alleen bestanden in opgegeven start-directory (inclusief onderliggende directories) worden bekeken
 	while read fileName ; do
-		find $1 -type f | grep "$fileName"
+		if [ true ] ; then
+			find $1 -type f | grep "$fileName"
+		fi
+
+		if [ "$del_dup" = true ] ; then
+			line+=( "$(find $1 -type f | grep "$fileName" | tail -n +2)")
+			array=($line)
+
+			for i in "${array[@]}"
+			do
+				rm $i
+			done
+		fi
+	done
+
+	# for fileName in $1; do
+	# 	for dupeFileName in $1; do
+	# 		if [ "$fileName" == "$dupeFileName" ]; then
+	# 			find $1 -type f | grep "$fileName"
+	# 		fi
+	# 	done
+	# done
+
 elif [ ! -d "$1" ] ; then
 	echo "directory 'val' does not exsist"
 elif [ ! -r "$1" ] ; then
