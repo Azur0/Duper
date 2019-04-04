@@ -6,14 +6,13 @@
 start_time=$(date)
 amount_deleted=0
 del_dup=false
-exclude=false
 #exclude_dir=()
-#exclude_file=()
+exclude_file=()
 #=======================================
 RED='\033[0;31m'
 NC='\033[0m'
 
-while getopts ":rxXl:" VALUE "$@"; do
+while getopts ":rx:Xl:" VALUE "$@"; do
 	# om gevonden duplicaten direct te laten verwijderen;
 	if [ $VALUE = "r" ] ; then
 		if [ "$del_dup" = false ]; then
@@ -24,10 +23,7 @@ while getopts ":rxXl:" VALUE "$@"; do
 	# <naam> om een file op te geven die buiten beschouwing gelaten moet worden bij het zoeken naar duplicaten. 
 	# (mag meerdere keren worden gebruikt, elke uit te sluiten file moet met een aparte -x genoemd worden; geen wildcards gebruiken zoals *);
 	if [ $VALUE = "x" ] ; then	
-		exclude=true
-
-		echo "$OPTARG"
-		exit 1
+		exclude_file+="$OPTARG"
 	fi
 	#Voeg een optie -X <filename> toe (hoofdletter X), met als argument een configuratie file waarin alle te excluden files en/of directories staan opgesomd, één per regel. 
 	#Dat is dus een alternatief voor het meerdere malen gebruiken van de -x optie (kleine x).
@@ -66,17 +62,18 @@ if [ -d "$1" ] ; then
 	find $1 -type f | sed 's_.*/__' | sort | uniq -d |
 	#Alleen bestanden in opgegeven start-directory (inclusief onderliggende directories) worden bekeken
 	while read fileName ; do
-		if [ true ] ; then
-			find $1 -type f -exec sha1sum "{}" \; | uniq -w32 -dD | awk '{print $1;}'
+		array=( "$(find $1 -type f -exec sha1sum "{}" \; | grep "$fileName" | tail -n +2 | awk '{print $2}')")
+
+		if [ ${#exclude_file[@]} -ne 0 ] ; then
+			
 		fi
 
-		if [ "$del_dup" = true ] ; then
-			line+=( "$(find $1 -type f -exec sha1sum "{}" \; | uniq -w32 -dD)")
-			array=($line)
+		echo "$array"
 
+		if [ "$del_dup" = true ] ; then
 			for i in "${array[@]}"
 			do
-				echo $i
+				rm $i
 			done
 		fi
 	done
