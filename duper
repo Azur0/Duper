@@ -13,6 +13,10 @@ exclude_file=()
 RED='\033[0;31m'
 NC='\033[0m'
 
+function usage () {
+	echo "Usage: $0 [-r] [-x filename] [-l landcode] [directory]"
+}
+
 while getopts ":rx:Xl:" VALUE "$@"; do
 	# om gevonden duplicaten direct te laten verwijderen;
 	if [ $VALUE = "r" ] ; then
@@ -39,7 +43,7 @@ while getopts ":rx:Xl:" VALUE "$@"; do
 		echo "language: $OPTARG"
 		
 		if [ ! -d "./lang" ] ; then
-			echo "directory 'lang' does not exsist!"
+			echo "directory 'lang' does not exist!"
 		elif [ ! -f "./lang/$OPTARG.sh" ] ; then
 			echo "Language '$OPTARG' file not found!"
 		else 
@@ -49,7 +53,13 @@ while getopts ":rx:Xl:" VALUE "$@"; do
 	#er zijn opties meegegeven die je niet geïmplementeerd hebt, druk dan een usage string af;
 	if [ $VALUE = "?" ] ; then
 		echo "Unknown flag -$OPTARG detected."
-        echo "Usage: $0 [-r] [-x filename] [-l landcode] [directory]"
+        usage
+        exit 1
+	fi
+	if [ $VALUE = ":" ] ; then
+		echo "Option -$OPTARG requires an argument."
+        usage
+        exit 1
 	fi
 done
 
@@ -62,22 +72,39 @@ if [ -d "$1" ] ; then
 	if [ ${#exclude_file[@]} -ne 0 ] ; then
 		for item in "${exclude_file[@]}"
 			do
-				exclude_array+=( "$(find $1 -name $item)" )
+				for item2 in $(find $1 -name $item | tail -n +2)
+				do
+					exclude_array+=("$item2")
+				done
 			done
 	fi
 
 	#Alleen bestanden in opgegeven start-directory (inclusief onderliggende directories) worden bekeken
 	while read fileName ; do
-		for item in $(find $1 -type f -exec sha1sum "{}" \; | grep "$fileName" | tail -n +2 | awk '{print $2}')
+		for item in $(find $1 -type f -exec sha1sum "{}" \; | grep "$fileName" | tail -n +3 | awk '{print $2}')
 		do
 			file_array+=("$item")
 		done
-	done <<< $(find $1 -type f | sed 's_.*/__' | sort | uniq -d)
-	
+	done <<< $(find $1 -type f | sort | uniq -d)
+		
 		if [ ${#exclude_file[@]} -ne 0 ] ; then
-			echo ""
+			for index in "${!exclude_array[@]}" ;
+			do
+
+				for item in ${exclude_array[@]};
+				do
+					if [ "${file_array[$index]}" = "$item" ]; then
+						unset file_array[$index]
+					fi
+				done
+			done
 		fi
-		echo "$exclude_file"
+
+		for item in "${file_array[@]}" ;
+		do
+			echo $item
+		done
+
 		if [ "$del_dup" = true ] ; then
 			for i in "${file_array[@]}"
 			do
@@ -86,7 +113,7 @@ if [ -d "$1" ] ; then
 		fi
 
 elif [ ! -d "$1" ] ; then
-	echo "${LANG_DirDNE:-directory 'val' does not exsist}"
+	echo "${LANG_DirDNE:-directory $1 does not exist}"
 elif [ ! -r "$1" ] ; then
 	echo "${LANG_DirINR:-directory is not readable}"
 fi
