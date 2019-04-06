@@ -6,6 +6,7 @@
 start_time=$(date)
 amount_deleted=0
 del_dup=false
+file_array=()
 #exclude_dir=()
 exclude_file=()
 #=======================================
@@ -22,10 +23,8 @@ while getopts ":rx:Xl:" VALUE "$@"; do
 	fi
 	# <naam> om een file op te geven die buiten beschouwing gelaten moet worden bij het zoeken naar duplicaten. 
 	# (mag meerdere keren worden gebruikt, elke uit te sluiten file moet met een aparte -x genoemd worden; geen wildcards gebruiken zoals *);
-	if [ $VALUE = "x" ] ; then	
-		exclude_file+="$OPTARG"
-
-		echo "$OPTARG"
+	if [ $VALUE = "x" ] ; then
+		exclude_file+=("$OPTARG")
 	fi
 	#Voeg een optie -X <filename> toe (hoofdletter X), met als argument een configuratie file waarin alle te excluden files en/of directories staan opgesomd, één per regel. 
 	#Dat is dus een alternatief voor het meerdere malen gebruiken van de -x optie (kleine x).
@@ -51,7 +50,6 @@ while getopts ":rx:Xl:" VALUE "$@"; do
 	if [ $VALUE = "?" ] ; then
 		echo "Unknown flag -$OPTARG detected."
         echo "Usage: $0 [-r] [-x filename] [-l landcode] [directory]"
-        exit 1
 	fi
 done
 
@@ -61,31 +59,31 @@ done
 shift $(($OPTIND - 1))
 
 if [ -d "$1" ] ; then
-	find $1 -type f | sed 's_.*/__' | sort | uniq -d |
+	if [ ${#exclude_file[@]} -ne 0 ] ; then
+		for item in "${exclude_file[@]}"
+			do
+				exclude_array+=( "$(find $1 -name $item)" )
+			done
+	fi
+
 	#Alleen bestanden in opgegeven start-directory (inclusief onderliggende directories) worden bekeken
 	while read fileName ; do
-		if [ true ] ; then
-			find $1 -type f -exec sha1sum "{}" \; | uniq -w32 -dD | awk '{print $2;}' | tail -n +2
+		for item in $(find $1 -type f -exec sha1sum "{}" \; | grep "$fileName" | tail -n +2 | awk '{print $2}')
+		do
+			file_array+=("$item")
+		done
+	done <<< $(find $1 -type f | sed 's_.*/__' | sort | uniq -d)
+	
+		if [ ${#exclude_file[@]} -ne 0 ] ; then
+			echo ""
 		fi
 		echo "$exclude_file"
 		if [ "$del_dup" = true ] ; then
-			line+=( "$(find $1 -type f -exec sha1sum "{}" \; | uniq -w32 -dD | awk '{print $2;}' | tail -n +2)")
-			array=($line)
-
-			for i in "${array[@]}"
+			for i in "${file_array[@]}"
 			do
 				rm $i
 			done
 		fi
-	done
-
-	# for fileName in $1; do
-	# 	for dupeFileName in $1; do
-	# 		if [ "$fileName" == "$dupeFileName" ]; then
-	# 			find $1 -type f | grep "$fileName"
-	# 		fi
-	# 	done
-	# done
 
 elif [ ! -d "$1" ] ; then
 	echo "${LANG_DirDNE:-directory 'val' does not exsist}"
