@@ -76,9 +76,11 @@ if [ -d "$1" ] ; then
 			file_array+=("$item")
 		done
 	done <<< $(find $1 -type f | sed 's_.*/__' | sort | uniq -d)
+		
 		if [ ${#exclude_file[@]} -ne 0 ] ; then
-			for (( index=-0; index<=${#file_array[@]}; index++ ));
+			for index in "${!exclude_array[@]}" ;
 			do
+
 				for item in ${exclude_array[@]};
 				do
 					if [ "${file_array[$index]}" = "$item" ]; then
