@@ -1,0 +1,25 @@
+."this is the manpage for Duper"
+.TH Duper "2019-04-07" "V1.0" "Duper man page"
+
+.SH NAME
+Duper
+
+.H description
+The command duper lets you compare files in directories and remove duplicates
+
+.SH OPTIONS
+.IP -r
+Enable the removal of duplicate files
+.IP -x
+Explude a file or directory
+.IP -X
+Not implemented: Explude a file or directory based on file
+.IP -l
+Select a language
+
+.SH SYNOPSIS
+\textbf{duper} [-r][\underline{-x \textit{filename}}][-X][-l \textit{landcode}] \textit{directory}
+
+.SH AUTHOR
+Burak Imre & Jeroen van Beuningen
+
