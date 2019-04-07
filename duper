@@ -18,7 +18,7 @@ function usage () {
 	echo "Usage: $0 [-r] [-x filename] [-l landcode] [directory]"
 }
 
-while getopts ":rx:Xl:" VALUE "$@"; do
+while getopts ":rx:X:l:" VALUE "$@"; do
 	# om gevonden duplicaten direct te laten verwijderen;
 	if [ $VALUE = "r" ] ; then
 		if [ "$del_dup" = false ]; then
@@ -35,6 +35,20 @@ while getopts ":rx:Xl:" VALUE "$@"; do
 	#Dat is dus een alternatief voor het meerdere malen gebruiken van de -x optie (kleine x).
 	if [ $VALUE = "X" ] ; then	
 		#extra
+		
+		if [ -f "$OPTARG" ] ; then
+			if [ ! -z "$OPTARG" ] ; then
+				while read line; do
+					if [ ! -z "$line" ] ; then
+						exclude_file+="$line"
+					fi
+				done < "$OPTARG"
+			else
+				echo $LANG_FIE
+			fi
+		else
+			echo $LANG_DirDNE
+		fi
 		exit 1
 	fi
 	# optie -l <landcode> om een landcode in 2 letters mee te geven, waarmee de taal van de meldingen kan worden ingesteld. 
@@ -123,7 +137,6 @@ fi
 
 #Het script maakt een directory ~/var en voegt regels aan een log file toe 
 #(duper.log) waarin diverse zaken omtrent het proces worden opgeslagen, zoals bijvoorbeeld: start-tijd eind-tijd aantal gevonden en verwijderde duplicaten
-mkdir -p ~/var
 printf "start time:\t$start_time \nend time:\t$(date) \namount found: \t$amount_found\namount deleted:\t$amount_deleted \n\n" >> ~/var/log.txt
 
 exit $?
