@@ -1,3 +1,7 @@
 LANG_DirDNE = "je m'appel friekandel"
 LANG_DirINR = "je m'appel friekandel"
 $LANG_FIE = "je m'appel friekandel"
+LANG_XAU = "je m'appel friekandel"
+LANG_AUBX = "je m'appel friekandel"
+LANG_AUSX = "je m'appel friekandel"
+LANG_DD = "je m'appel friekandel"
