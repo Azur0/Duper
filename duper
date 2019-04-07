@@ -16,6 +16,7 @@ used_small_x=false
 # COLOR CODES
 RED='\033[0;31m'
 NC='\033[0m'
+SCRIPT_DIR=$(dirname $(cd "$(dirname "$BASH_SOURCE")"; pwd))
 #=======================================
 clear
 
@@ -95,13 +96,12 @@ while getopts ":rix:X:l:f:" VALUE "$@"; do
 	# Dan kun je het juiste taalbestand laden met behulp van het source-mechanisme.
 	if [ $VALUE = "l" ] ; then
 		echo "language: $OPTARG"
-		
-		if [ ! -d "./lang" ] ; then
+		if [ ! -d "$SCRIPT_DIR/Duper/lang" ] ; then
 			echo "directory 'lang' does not exist!"
-		elif [ ! -f "./lang/$OPTARG.sh" ] ; then
+		elif [ ! -f "$SCRIPT_DIR/Duper/lang/$OPTARG.sh" ] ; then
 			echo "Language '$OPTARG' file not found!"
 		else 
-			source "./lang/$OPTARG.sh"
+			source "$SCRIPT_DIR/Duper/lang/$OPTARG.sh"
 		fi
 	fi
 	#extra
