@@ -2,36 +2,56 @@
 # 2082809 Jeroen Jetrax t6 van Beuningen
 # 2139192 Burak (krakatoa) Imre
 # Duper
-#=======================================
+
+#=variablen=============================
 start_time=$(date)
 amount_found=0
 amount_deleted=0
 del_dup=false
+lin_dup=false
 file_array=()
 exclude_file=()
-used_X=false
+used_captipal_x=false
 used_small_x=false
 # COLOR CODES
 RED='\033[0;31m'
 NC='\033[0m'
 #=======================================
+clear
 
+#=functions=============================
 function usage () {
-	echo "Usage: $0 [-r] [-x filename | -X filename] [-l landcode] [directory]"
+	echo "Usage: $0 [-r | -1] [-x filename | -X filename] [-l landcode] [directory]"
 }
 
-while getopts ":rx:X:l:" VALUE "$@"; do
+#=getops================================
+while getopts ":rix:X:l:f:" VALUE "$@"; do
 	# om gevonden duplicaten direct te laten verwijderen;
 	if [ $VALUE = "r" ] ; then
-		if [ "$del_dup" = false ]; then
-			echo -e "[ ${RED}DELETE DUPLICATE MODE ${NC}]"
-			del_dup=true
+		if [ $lin_dup != true ] ; then
+			if [ $del_dup == false ]; then
+				echo -e "[ ${RED}DELETE DUPLICATE MODE ${NC}]"
+				del_dup=true
+			fi
+		fi
+	fi
+	#extra
+	#Voeg een optie -i toe. Deze zorgt ervoor dat duplicaten niet verwijderd worden maar als hardlinks naar het ‘origineel’ worden gelegd zodat ze geen extra ruimte in beslag nemen. 
+	#Let op! Indien je deze extra optie implementeert, moet je ook voorkomen dat de opties -ren -itegelijk actief zijn.
+	if [ $VALUE = "i" ] ; then
+		if [ $del_dup != true ] ; then
+			if [ $lin_dup != true ] ; then
+				echo "LINK DUPLICATE MODE"
+				lin_dup=true
+			fi
+		else
+			echo "DELETE DUPLICATE MODE is already active, Ignoring argument"
 		fi
 	fi
 	# <naam> om een file op te geven die buiten beschouwing gelaten moet worden bij het zoeken naar duplicaten. 
 	# (mag meerdere keren worden gebruikt, elke uit te sluiten file moet met een aparte -x genoemd worden; geen wildcards gebruiken zoals *);
 	if [ $VALUE = "x" ] ; then
-		if [ $used_X == true] ; then 
+		if [ $used_captipal_x == true] ; then 
 			echo $LANG_AUBX
 		else
 			exclude_file+=("$OPTARG")
@@ -48,7 +68,7 @@ while getopts ":rx:X:l:" VALUE "$@"; do
 		if [ $used_small_x == true] ; then
 			echo $LANG_AUSX
 		else
-			if [ $used_X == false] ; then
+			if [ $used_captipal_x == false] ; then
 				if [ -f "$OPTARG" ] ; then
 					if [ ! -z "$OPTARG" ] ; then
 						while read line; do
@@ -63,7 +83,7 @@ while getopts ":rx:X:l:" VALUE "$@"; do
 					echo $LANG_DirDNE
 				fi
 
-				used_X=true
+				used_captipal_x=true
 			else
 				echo $LANG_XAU
 			fi
@@ -83,6 +103,13 @@ while getopts ":rx:X:l:" VALUE "$@"; do
 			source "./lang/$OPTARG.sh"
 		fi
 	fi
+	#extra
+	#optie -f <filename> om een bestand aan te maken met daarin de absolute paden naar alle gevonden duplicaten. 
+	#Op elke regel staat 1 bestandsnaam omgeven door "-karakters. 
+	#Dit bestand kan gebruikt worden om op een later tijdstip een bewerking op de gevonden duplicaten te kunnen doen met andere tool dan duper.
+	if [ $VALUE = "f" ] ; then
+		:
+	fi
 	#er zijn opties meegegeven die je niet geïmplementeerd hebt, druk dan een usage string af;
 	if [ $VALUE = "?" ] ; then
 		echo "Unknown flag -$OPTARG detected."
@@ -96,8 +123,7 @@ while getopts ":rx:X:l:" VALUE "$@"; do
 	fi
 done
 
-#echo $exclude_file
-
+#=======================================
 #de start-directory bestaat niet, is geen directory, of mag niet gelezen worden.
 shift $(($OPTIND - 1))
 
@@ -120,41 +146,41 @@ if [ -d "$1" ] ; then
 		done
 	done <<< $(find $1 -type f | sort | uniq -d)
 		
-		if [ ${#exclude_file[@]} -ne 0 ] ; then
-			for index in "${!exclude_array[@]}" ;
-			do
-
-				for item in ${exclude_array[@]};
-				do
-					if [ "${file_array[$index]}" = "$item" ]; then
-						unset file_array[$index]
-					fi
-				done
-			done
-		fi
-
-		for item in "${file_array[@]}" ;
+	if [ ${#exclude_file[@]} -ne 0 ] ; then
+		for index in "${!exclude_array[@]}" ;
 		do
-			((amount_found++))
-			echo $item
-		done
 
-		if [ "$del_dup" = true ] ; then
-			for i in "${file_array[@]}"
+			for item in ${exclude_array[@]};
 			do
-				((amount_deleted++))
-				rm $i
+				if [ "${file_array[$index]}" = "$item" ]; then
+					unset file_array[$index]
+				fi
 			done
-		fi
+		done
+	fi
 
+	for item in "${file_array[@]}" ;
+	do
+		((amount_found++))
+		echo $item
+	done
+
+	if [ "$del_dup" = true ] ; then
+		for i in "${file_array[@]}"
+		do
+			((amount_deleted++))
+			rm $i
+		done
+	fi
 elif [ ! -d "$1" ] ; then
 	echo "${LANG_DirDNE:-directory $1 does not exist}"
 elif [ ! -r "$1" ] ; then
 	echo "${LANG_DirINR:-directory is not readable}"
 fi
 
+#=log===================================
 #Het script maakt een directory ~/var en voegt regels aan een log file toe 
 #(duper.log) waarin diverse zaken omtrent het proces worden opgeslagen, zoals bijvoorbeeld: start-tijd eind-tijd aantal gevonden en verwijderde duplicaten
-printf "start time:\t$start_time \nend time:\t$(date) \namount found: \t$amount_found\namount deleted:\t$amount_deleted \n\n" >> ~/var/log.txt
+printf "start time:\t$start_time \nend time:\t$(date) \namount found: \t$amount_found\namount deleted:\t$amount_deleted \n\n" >> ~/var/duper.log
 
 exit $?
