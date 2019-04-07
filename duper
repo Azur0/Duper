@@ -28,20 +28,22 @@ function usage () {
 while getopts ":rix:X:l:f:" VALUE "$@"; do
 	# om gevonden duplicaten direct te laten verwijderen;
 	if [ $VALUE = "r" ] ; then
-		if [ $lin_dup != true ] ; then
-			if [ $del_dup == false ]; then
+		if [ "$lin_dup" != true ] ; then
+			if [ "$del_dup" == false ]; then
 				echo -e "[ ${RED}DELETE DUPLICATE MODE ${NC}]"
 				del_dup=true
 			fi
+		else
+			echo "LINK DUPLICATE MODE is already active, Ignoring argument"
 		fi
 	fi
 	#extra
 	#Voeg een optie -i toe. Deze zorgt ervoor dat duplicaten niet verwijderd worden maar als hardlinks naar het ‘origineel’ worden gelegd zodat ze geen extra ruimte in beslag nemen. 
 	#Let op! Indien je deze extra optie implementeert, moet je ook voorkomen dat de opties -ren -itegelijk actief zijn.
 	if [ $VALUE = "i" ] ; then
-		if [ $del_dup != true ] ; then
-			if [ $lin_dup != true ] ; then
-				echo "LINK DUPLICATE MODE"
+		if [ "$del_dup" != true ] ; then
+			if [ "$lin_dup" != true ] ; then
+				echo -e "[ ${RED}LINK DUPLICATE MODE ${NC}]"
 				lin_dup=true
 			fi
 		else
@@ -108,7 +110,8 @@ while getopts ":rix:X:l:f:" VALUE "$@"; do
 	#Op elke regel staat 1 bestandsnaam omgeven door "-karakters. 
 	#Dit bestand kan gebruikt worden om op een later tijdstip een bewerking op de gevonden duplicaten te kunnen doen met andere tool dan duper.
 	if [ $VALUE = "f" ] ; then
-		:
+		filename="$OPTARG"
+		echo "$filename"
 	fi
 	#er zijn opties meegegeven die je niet geïmplementeerd hebt, druk dan een usage string af;
 	if [ $VALUE = "?" ] ; then
@@ -158,18 +161,24 @@ if [ -d "$1" ] ; then
 			done
 		done
 	fi
-
+	#
 	for item in "${file_array[@]}" ;
 	do
 		((amount_found++))
-		echo $item
+		echo "found duplicate: $item"
 	done
 
 	if [ "$del_dup" = true ] ; then
 		for i in "${file_array[@]}"
 		do
 			((amount_deleted++))
+			echo "$LANG_DD $item"
 			rm $i
+		done
+	elif [ "$lin_dup" = true ] ; then
+		for i in "${file_array[@]}"
+		do
+			:
 		done
 	fi
 elif [ ! -d "$1" ] ; then
