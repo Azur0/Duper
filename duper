@@ -9,13 +9,15 @@ amount_deleted=0
 del_dup=false
 file_array=()
 exclude_file=()
+used_X=false
+used_small_x=false
 # COLOR CODES
 RED='\033[0;31m'
 NC='\033[0m'
 #=======================================
 
 function usage () {
-	echo "Usage: $0 [-r] [-x filename] [-l landcode] [directory]"
+	echo "Usage: $0 [-r] [-x filename | -X filename] [-l landcode] [directory]"
 }
 
 while getopts ":rx:X:l:" VALUE "$@"; do
@@ -29,27 +31,43 @@ while getopts ":rx:X:l:" VALUE "$@"; do
 	# <naam> om een file op te geven die buiten beschouwing gelaten moet worden bij het zoeken naar duplicaten. 
 	# (mag meerdere keren worden gebruikt, elke uit te sluiten file moet met een aparte -x genoemd worden; geen wildcards gebruiken zoals *);
 	if [ $VALUE = "x" ] ; then
-		exclude_file+=("$OPTARG")
+		if [ $used_X == true] ; then 
+			echo $LANG_AUBX
+		else
+			exclude_file+=("$OPTARG")
+
+			if [ $used_small_x == false] ; then
+				$used_small_x=true
+			fi
+		fi
 	fi
+	#EXTRA
 	#Voeg een optie -X <filename> toe (hoofdletter X), met als argument een configuratie file waarin alle te excluden files en/of directories staan opgesomd, één per regel. 
 	#Dat is dus een alternatief voor het meerdere malen gebruiken van de -x optie (kleine x).
 	if [ $VALUE = "X" ] ; then	
-		#extra
-		
-		if [ -f "$OPTARG" ] ; then
-			if [ ! -z "$OPTARG" ] ; then
-				while read line; do
-					if [ ! -z "$line" ] ; then
-						exclude_file+="$line"
-					fi
-				done < "$OPTARG"
-			else
-				echo $LANG_FIE
-			fi
+		if [ $used_small_x == true] ; then
+			echo $LANG_AUSX
 		else
-			echo $LANG_DirDNE
+			if [ $used_X == false] ; then
+				if [ -f "$OPTARG" ] ; then
+					if [ ! -z "$OPTARG" ] ; then
+						while read line; do
+							if [ ! -z "$line" ] ; then
+								exclude_file+=("$line")
+							fi
+						done < "$OPTARG"
+					else
+						echo $LANG_FIE
+					fi
+				else
+					echo $LANG_DirDNE
+				fi
+
+				used_X=true
+			else
+				echo $LANG_XAU
+			fi
 		fi
-		exit 1
 	fi
 	# optie -l <landcode> om een landcode in 2 letters mee te geven, waarmee de taal van de meldingen kan worden ingesteld. 
 	# Om dat te bouwen kun je voor alle meldingen shell variabelen definiëren, die je voor elke taal in een bestand zet. 
@@ -90,7 +108,7 @@ if [ -d "$1" ] ; then
 				for item2 in $(find $1 -name $item | tail -n +2)
 				do
 					exclude_array+=("$item2")
-				done
+				done 2> /dev/null
 			done
 	fi
 

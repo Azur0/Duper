@@ -1,3 +1,6 @@
 LANG_DirDNE = "pat bestaat niet"
 LANG_DirINR = "pat is niet leesbaar"
 $LANG_FIE = "File is leeg!"
+$LANG_XAU = "X is al gebruikt, command genegeer"
+$LANG_AUBX = "already used -x, ignoring command"
+$LANG_AUSX = "already used -X, ignoring command"

@@ -1,3 +1,6 @@
 LANG_DirDNE = "directory does not exsist"
 LANG_DirINR = "directory is not readable"
 $LANG_FIE = "File is empty!"
+$$LANG_XAU = "X has already been used, command ignored"
+$LANG_AUBX = "already used -x, ignoring command"
+$LANG_AUSX = "already used -X, ignoring command"
