@@ -4,14 +4,15 @@
 # Duper
 #=======================================
 start_time=$(date)
+amount_found=0
 amount_deleted=0
 del_dup=false
 file_array=()
-#exclude_dir=()
 exclude_file=()
-#=======================================
+# COLOR CODES
 RED='\033[0;31m'
 NC='\033[0m'
+#=======================================
 
 function usage () {
 	echo "Usage: $0 [-r] [-x filename] [-l landcode] [directory]"
@@ -102,12 +103,14 @@ if [ -d "$1" ] ; then
 
 		for item in "${file_array[@]}" ;
 		do
+			((amount_found++))
 			echo $item
 		done
 
 		if [ "$del_dup" = true ] ; then
 			for i in "${file_array[@]}"
 			do
+				((amount_deleted++))
 				rm $i
 			done
 		fi
@@ -121,6 +124,6 @@ fi
 #Het script maakt een directory ~/var en voegt regels aan een log file toe 
 #(duper.log) waarin diverse zaken omtrent het proces worden opgeslagen, zoals bijvoorbeeld: start-tijd eind-tijd aantal gevonden en verwijderde duplicaten
 mkdir -p ~/var
-printf "start time:\t$start_time \nend time:\t$(date) \namount deleted:\t$amount_deleted \n\n" >> ~/var/log.txt
+printf "start time:\t$start_time \nend time:\t$(date) \namount found: \t$amount_found\namount deleted:\t$amount_deleted \n\n" >> ~/var/log.txt
 
 exit $?
