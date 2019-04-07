@@ -11,7 +11,7 @@ del_dup=false
 lin_dup=false
 file_array=()
 exclude_file=()
-used_captipal_x=false
+used_cap_x=false
 used_small_x=false
 # COLOR CODES
 RED='\033[0;31m'
@@ -53,12 +53,12 @@ while getopts ":rix:X:l:f:" VALUE "$@"; do
 	# <naam> om een file op te geven die buiten beschouwing gelaten moet worden bij het zoeken naar duplicaten. 
 	# (mag meerdere keren worden gebruikt, elke uit te sluiten file moet met een aparte -x genoemd worden; geen wildcards gebruiken zoals *);
 	if [ $VALUE = "x" ] ; then
-		if [ $used_captipal_x == true] ; then 
+		if [ $used_cap_x == true ] ; then 
 			echo $LANG_AUBX
 		else
 			exclude_file+=("$OPTARG")
 
-			if [ $used_small_x == false] ; then
+			if [ $used_small_x == false ] ; then
 				$used_small_x=true
 			fi
 		fi
@@ -67,10 +67,10 @@ while getopts ":rix:X:l:f:" VALUE "$@"; do
 	#Voeg een optie -X <filename> toe (hoofdletter X), met als argument een configuratie file waarin alle te excluden files en/of directories staan opgesomd, één per regel. 
 	#Dat is dus een alternatief voor het meerdere malen gebruiken van de -x optie (kleine x).
 	if [ $VALUE = "X" ] ; then	
-		if [ $used_small_x == true] ; then
+		if [ $used_small_x == true ] ; then
 			echo $LANG_AUSX
 		else
-			if [ $used_captipal_x == false] ; then
+			if [ $used_cap_x == false ] ; then
 				if [ -f "$OPTARG" ] ; then
 					if [ ! -z "$OPTARG" ] ; then
 						while read line; do
@@ -84,8 +84,7 @@ while getopts ":rix:X:l:f:" VALUE "$@"; do
 				else
 					echo $LANG_DirDNE
 				fi
-
-				used_captipal_x=true
+				used_cap_x=true
 			else
 				echo $LANG_XAU
 			fi
