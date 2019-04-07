@@ -96,6 +96,7 @@ if [ -d "$1" ] ; then
 			for i in "${file_array[@]}"
 			do
 				echo $i
+				rm $i
 			done
 		fi
 
@@ -107,7 +108,7 @@ fi
 
 #Het script maakt een directory ~/var en voegt regels aan een log file toe 
 #(duper.log) waarin diverse zaken omtrent het proces worden opgeslagen, zoals bijvoorbeeld: start-tijd eind-tijd aantal gevonden en verwijderde duplicaten
-mkdir -p ~/var
+
 printf "start time:\t$start_time \nend time:\t$(date) \namount deleted:\t$amount_deleted \n\n" >> ~/var/log.txt
 
 exit $?
